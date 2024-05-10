@@ -9,18 +9,34 @@ public class ParallaxScript : MonoBehaviour
     private Vector3 lastCameraPosition;
     public float smoothness = 5f; // Adjust this value for desired smoothness
     float timer = 0;
+
     void Start()
+    {
+        InitializeVariables();
+    }
+
+    void Update()
+    {
+        MoveCameraBasedOnSinWave();
+        ApplyParallaxEffect();
+        UpdatePositions();
+    }
+
+    private void InitializeVariables()
     {
         startPos = Camera.main.transform.position.x;
         length = backgrounds[0].GetComponent<SpriteRenderer>().bounds.size.x;
         lastCameraPosition = Camera.main.transform.position;
     }
 
-    void Update()
+    private void MoveCameraBasedOnSinWave()
     {
         timer += Time.deltaTime * 0.05f;
-        //Move cameras x direction based on sin wave
         Camera.main.transform.position = new Vector3((Mathf.Sin(timer) * 45), Camera.main.transform.position.y, Camera.main.transform.position.z);
+    }
+
+    private void ApplyParallaxEffect()
+    {
         float cameraDelta = Camera.main.transform.position.x - lastCameraPosition.x;
         float dist = cameraDelta * parallaxEffect;
 
@@ -32,7 +48,13 @@ public class ParallaxScript : MonoBehaviour
 
             // Smoothly transition to the target position
             backgrounds[i].position = Vector3.Lerp(backgrounds[i].position, backgroundTargetPos, Time.deltaTime * smoothness);
+        }
+    }
 
+    private void UpdatePositions()
+    {
+        for (int i = 0; i < backgrounds.Count; i++)
+        {
             // Check if the background is off screen
             if (backgrounds[i].position.x + length / 2 < startPos - length * (backgrounds.Count - 1))
             {
